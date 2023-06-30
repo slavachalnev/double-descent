@@ -77,7 +77,7 @@ def compute_fractional_dims(h):
     return fractional_dims
 
 
-def plot_sample_h(data, model):
+def plot_sample_h(data, model, T):
     hs_x = []
     hs_y = []
 
@@ -98,6 +98,8 @@ def plot_sample_h(data, model):
     plt.plot([0, 0], [0, 0], '', color='red')
     for x, y in zip(hs_x, hs_y):
         plt.plot([0, x], [0, y], color='red')
+    
+    plt.savefig(f'sample_{T}.png')
     plt.show()
 
     return compute_fractional_dims(h)
@@ -108,7 +110,7 @@ def plot_sample_h(data, model):
 
 # %%
 
-def plot_feats(model):
+def plot_feats(model, T):
     # plots columns of W
     W = model.W.detach().cpu()
     # W is 2 x n
@@ -125,6 +127,7 @@ def plot_feats(model):
     for x, y in zip(W[0], W[1]):
         plt.plot([0, x], [0, y], color='blue')
 
+    plt.savefig(f'feats_{T}.png')
     plt.show()
 
     return compute_fractional_dims(W)
@@ -138,8 +141,8 @@ def run_experiment(T, device):
     model = Model()
     data = get_data(T)
     train(model, data, device=device)
-    sample_dims = plot_sample_h(data, model)
-    feat_dims = plot_feats(model)
+    sample_dims = plot_sample_h(data, model, T)
+    feat_dims = plot_feats(model, T)
 
     return sample_dims, feat_dims
 
@@ -149,7 +152,7 @@ def run_experiment(T, device):
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-ts = [3, 5, 6, 8, 10, 15, 30,]# 50, 100, 1000, 10000]
+ts = [3, 5,]# 6, 8, 10, 15, 30,]# 50, 100, 1000, 10000]
 
 sample_dims = []
 feat_dims = []
@@ -169,6 +172,8 @@ plt.figure(figsize=(10, 10))
 for T, s_dim, f_dim in zip(ts, sample_dims, feat_dims):
     plt.scatter([T]*len(s_dim), s_dim, color='red')
     plt.scatter([T]*len(f_dim), f_dim, color='blue')
+
+plt.savefig('dims.png')
 plt.show()
 
 
