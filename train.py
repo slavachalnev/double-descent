@@ -26,7 +26,10 @@ def loss(x, x_hat):
     return torch.sum((x - x_hat) ** 2) / T
 
 
-def train(model, data, steps=50000, peak_lr=0.001, warmup_steps=2500):
+def train(model, data, steps=50000, peak_lr=0.001, warmup_steps=2500, device='cpu'):
+    model = model.to(device)
+    data = data.to(device)
+
     optimizer = torch.optim.AdamW(model.parameters(), lr=peak_lr, weight_decay=0.01)
     warmup_func = lambda x: x / warmup_steps
     decay_func = lambda x: 0.5 * (1 + math.cos(math.pi * (x - warmup_steps) / (steps - warmup_steps)))
@@ -40,6 +43,9 @@ def train(model, data, steps=50000, peak_lr=0.001, warmup_steps=2500):
         optimizer.step()
         lr_scheduler.step()
         
+    model = model.cpu()
+    data = data.cpu()
+
     T = data.shape[1]
     torch.save(model.state_dict(), f'model_T{T}.pt')
 
@@ -131,7 +137,7 @@ def plot_feats(model):
 def run_experiment(T, device):
     model = Model()
     data = get_data(T)
-    train(model, data)
+    train(model, data, device=device)
     sample_dims = plot_sample_h(data, model)
     feat_dims = plot_feats(model)
 
