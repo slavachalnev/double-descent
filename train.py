@@ -55,7 +55,7 @@ def train(model, data, steps=50000, peak_lr=0.001, warmup_steps=2500):
 # %%
 
 model = Model()
-data = get_data(T=5)
+data = get_data(T=10)
 train(model, data)#, steps=100000)
 
 # %%
@@ -63,14 +63,21 @@ train(model, data)#, steps=100000)
 def plot_sample_h(data, model):
     hs_x = []
     hs_y = []
-    for x in data.T:
-        with torch.no_grad():
-            h = model(x, return_h=True)
-            hs_x.append(h[0].item())
-            hs_y.append(h[1].item())
+    fractional_dims = []
+
+    with torch.no_grad():
+        h = model(data, return_h=True)
+    
+    for h_i in h.T:
+        numerator = torch.norm(h_i) ** 2
+        h_i_hat = h_i / torch.norm(h_i)
+        denominator = torch.sum((h_i_hat @ h) ** 2)
+        fractional_dims.append(numerator / denominator)
+    
+    hs_x = h[0].cpu().numpy()
+    hs_y = h[1].cpu().numpy()
 
     plt.figure(figsize=(10, 10))
-
     max_abs = max(abs(max(hs_x)), abs(min(hs_x)), abs(max(hs_y)), abs(min(hs_y))) 
     plt.xlim(-max_abs, max_abs)
     plt.ylim(-max_abs, max_abs)
@@ -83,6 +90,8 @@ def plot_sample_h(data, model):
         plt.plot([0, x], [0, y], color='red')
     plt.show()
 
+    return fractional_dims
+
 plot_sample_h(data, model)
 
 
@@ -93,9 +102,12 @@ def plot_feats(model):
     # plots columns of W
     W = model.W.detach().cpu().numpy()
     # W is 2 x n
+
     plt.figure(figsize=(10, 10))
-    plt.xlim(-1, 1)
-    plt.ylim(-1, 1)
+    max_abs = max(W.min(), W.max(), key=abs)
+    plt.xlim(-max_abs, max_abs)
+    plt.ylim(-max_abs, max_abs)
+
     plt.plot(W[0], W[1], 'o', color='blue')
 
     # connect every point to (0, 0)
