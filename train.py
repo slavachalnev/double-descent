@@ -15,8 +15,8 @@ def get_data(T, n=10000, sparsity=0.999):
     mask = torch.rand(n, T) < sparsity
     x[mask] = 0
 
-    # rescale so that each row is unit norm
-    x = x / (torch.norm(x, dim=1, keepdim=True) + 1e-5)
+    # rescale
+    x = x / (torch.norm(x, dim=0, keepdim=True) + 1e-5)
 
     return x
 
@@ -101,6 +101,7 @@ def plot_sample_h(data, model, T):
     
     plt.savefig(f'sample_{T}.png')
     plt.show()
+    plt.close()
 
     return compute_fractional_dims(h)
 
@@ -129,6 +130,7 @@ def plot_feats(model, T):
 
     plt.savefig(f'feats_{T}.png')
     plt.show()
+    plt.close()
 
     return compute_fractional_dims(W)
 
@@ -137,7 +139,7 @@ def plot_feats(model, T):
 
 # %%
 
-def run_experiment(T, device):
+def run_experiment(T, device='cpu'):
     model = Model()
     data = get_data(T)
     train(model, data, device=device)
@@ -175,7 +177,7 @@ for T, s_dim, f_dim in zip(ts, sample_dims, feat_dims):
 
 plt.savefig('dims.png')
 plt.show()
+plt.close()
 
 
 # %%
-
