@@ -15,7 +15,7 @@ class Model(nn.Module):
         nn.init.xavier_uniform_(self.W)
 
         # b shape is (m,)
-        self.b = nn.Parameter(torch.zeros(m))
+        self.b = nn.Parameter(torch.zeros(n, 1))
     
 
     def forward(self, x, return_h=False):
