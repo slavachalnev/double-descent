@@ -53,14 +53,6 @@ def train(model, data, steps=50000, peak_lr=0.001, warmup_steps=2500, device='cp
         l = loss(test_data, x_hat)
         print('test loss', l.item())
     
-    
-# %%
-
-# model = Model()
-# data = get_data(T=10)
-# train(model, data)#, steps=100000)
-
-# %%
 
 def compute_fractional_dims(h):
     fractional_dims = []
@@ -102,11 +94,6 @@ def plot_sample_h(data, model, T):
 
     return compute_fractional_dims(h)
 
-# plot_sample_h(data, model)
-
-
-
-# %%
 
 def plot_feats(model, T):
     # plots columns of W
@@ -131,10 +118,6 @@ def plot_feats(model, T):
 
     return compute_fractional_dims(W)
 
-
-# plot_feats(model)
-
-# %%
 
 def run_experiment(T, device='cpu', dtype=torch.float32):
     model = Model(dtype=dtype)
