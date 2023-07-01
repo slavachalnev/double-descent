@@ -26,7 +26,7 @@ def loss(x, x_hat):
     return torch.sum((x - x_hat) ** 2) / T
 
 
-def train(model, data, steps=50000, peak_lr=0.001, warmup_steps=2500, device='cpu'):
+def train(model, data, steps=50000, peak_lr=0.001, warmup_steps=2500, device='cpu', dtype=torch.float32):
     model = model.to(device)
     data = data.to(device)
 
@@ -43,14 +43,11 @@ def train(model, data, steps=50000, peak_lr=0.001, warmup_steps=2500, device='cp
         optimizer.step()
         lr_scheduler.step()
         
-    model = model.cpu()
-    data = data.cpu()
-
     T = data.shape[1]
     torch.save(model.state_dict(), f'model_T{T}.pt')
 
     # test
-    test_data = get_data(1000, dtype=model.W.dtype)
+    test_data = get_data(1000, dtype=dtype).to(device)
     with torch.no_grad():
         x_hat = model(test_data)
         l = loss(test_data, x_hat)
@@ -141,8 +138,14 @@ def plot_feats(model, T):
 
 def run_experiment(T, device='cpu', dtype=torch.float32):
     model = Model(dtype=dtype)
-    data = get_data(T)
-    train(model, data, device=device)
+    data = get_data(T, dtype=dtype)
+    train(model, data, device=device, dtype=dtype)
+
+    data = data.cpu()
+    data = data.to(dtype=torch.float32)
+    model = model.cpu()
+    model = model.to(dtype=torch.float32)
+
     sample_dims = plot_sample_h(data, model, T)
     feat_dims = plot_feats(model, T)
 
@@ -155,7 +158,7 @@ def run_experiment(T, device='cpu', dtype=torch.float32):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 dtype = torch.float32
 
-ts = [3, 5, ]#6, 8, 10, 15, 30, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
+ts = [3, 5, 6, 8, 10, 15, 30, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
 
 sample_dims = []
 feat_dims = []

@@ -163,3 +163,7 @@ cython_debug/
 # saved
 *.png
 *.pt
+
+
+# mac
+.DS_Store
