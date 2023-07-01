@@ -35,15 +35,22 @@ def train(model, data, steps=50000, peak_lr=0.001, warmup_steps=2500, device='cp
     decay_func = lambda x: 0.5 * (1 + math.cos(math.pi * (x - warmup_steps) / (steps - warmup_steps)))
     lr_scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda x: warmup_func(x) if x <= warmup_steps else decay_func(x))
 
+    T = data.shape[1]
+
+    batch_size = min(1000, T)
+
     for step in tqdm(range(steps)):
         optimizer.zero_grad()
-        x_hat = model(data)
-        l = loss(data, x_hat)
-        l.backward()
+
+        for i in range(0, T, batch_size):
+            batch = data[:, i:i+batch_size]
+            x_hat = model(batch)
+            l = loss(batch, x_hat)
+            l.backward()
+
         optimizer.step()
         lr_scheduler.step()
         
-    T = data.shape[1]
     torch.save(model.state_dict(), f'model_T{T}.pt')
 
     # test
