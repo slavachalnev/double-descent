@@ -154,7 +154,7 @@ def run_experiment(T, device='cpu'):
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-ts = [3, 5, 6, ]#8, 10, ]#15, 30, 50, 100, 1000, 10000, 20000, 50000, 100000]
+ts = [3, 5, 6, 8, 10, 15, 30, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
 
 sample_dims = []
 feat_dims = []
@@ -172,8 +172,8 @@ plt.figure(figsize=(10, 10))
 
 # For each T, plot all the corresponding sample_dims and feat_dims
 for T, s_dim, f_dim in zip(ts, sample_dims, feat_dims):
-    plt.scatter([T]*len(s_dim), s_dim, color='red')
-    plt.scatter([T]*len(f_dim), f_dim, color='blue')
+    plt.scatter([T]*len(s_dim), s_dim, color='red', alpha=0.5)
+    plt.scatter([T]*len(f_dim), f_dim, color='blue', alpha=0.5)
 
 plt.xscale('log')
 plt.savefig('dims.png')
