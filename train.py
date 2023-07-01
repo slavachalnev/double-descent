@@ -10,8 +10,8 @@ from model import Model
 
 
 # data is a shape (n, T) tensor
-def get_data(T, n=10000, sparsity=0.999):
-    x = torch.rand(n, T)
+def get_data(T, n=10000, sparsity=0.999, dtype=torch.float32):
+    x = torch.rand(n, T, dtype=dtype)
     mask = torch.rand(n, T) < sparsity
     x[mask] = 0
 
@@ -50,7 +50,7 @@ def train(model, data, steps=50000, peak_lr=0.001, warmup_steps=2500, device='cp
     torch.save(model.state_dict(), f'model_T{T}.pt')
 
     # test
-    test_data = get_data(1000)
+    test_data = get_data(1000, dtype=model.W.dtype)
     with torch.no_grad():
         x_hat = model(test_data)
         l = loss(test_data, x_hat)
@@ -139,8 +139,8 @@ def plot_feats(model, T):
 
 # %%
 
-def run_experiment(T, device='cpu'):
-    model = Model()
+def run_experiment(T, device='cpu', dtype=torch.float32):
+    model = Model(dtype=dtype)
     data = get_data(T)
     train(model, data, device=device)
     sample_dims = plot_sample_h(data, model, T)
@@ -153,15 +153,16 @@ def run_experiment(T, device='cpu'):
 # %%
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+dtype = torch.float32
 
-ts = [3, 5, 6, 8, 10, 15, 30, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
+ts = [3, 5, ]#6, 8, 10, 15, 30, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
 
 sample_dims = []
 feat_dims = []
 
 for T in ts:
     print('T', T)
-    sample_dim, feat_dim = run_experiment(T, device=device)
+    sample_dim, feat_dim = run_experiment(T, device=device, dtype=dtype)
     sample_dims.append(sample_dim)
     feat_dims.append(feat_dim)
 
